@@ -38,15 +38,17 @@ public class industrialFurnaceBlockEntity extends SmartBlockEntity implements IH
     @SuppressWarnings("removal")
     @Override
     public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-        if (tankBehaviour == null || tankBehaviour.getPrimaryHandler() == null)
-            return false;
+        int lvl = 4;
 
         FluidStack stack = tankBehaviour.getPrimaryHandler().getFluid();
-        if (stack.isEmpty())
-            return false;
-
-        tooltip.add(Component.literal(stack.getDisplayName().getString() + " : " + stack.getAmount() + " mB"));
-        return true;
+        
+        if (stack.isEmpty()) {
+                tooltip.add(Component.literal(" ".repeat(lvl) + "Empty"));
+                return true;
+            } else {
+                tooltip.add(Component.literal(" ".repeat(lvl) + stack.getDisplayName().getString() + ": " + stack.getAmount() + " mB"));
+                return true;
+            }
     }
 
     // Optional convenience methods to interact with the tank manually

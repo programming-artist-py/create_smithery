@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "com.penguin.smithery.mixin.client",
+  "compatibilityLevel": "JAVA_17",
+  "client": true,
+  "mixins": [
+    "GoggleOverlayDebugMixin"
+  ]
+}

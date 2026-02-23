@@ -1,0 +1,7 @@
+{
+  "required": true,
+  "package": "com.penguin.smithery.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+  ]
+}
