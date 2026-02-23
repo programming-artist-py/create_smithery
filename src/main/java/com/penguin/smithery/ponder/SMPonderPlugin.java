@@ -1,6 +1,7 @@
 package com.penguin.smithery.ponder;
 
 import com.penguin.smithery.CreateSmithery;
+import com.penguin.smithery.index.SMPonders;
 
 import net.createmod.ponder.api.registration.PonderPlugin;
 import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
@@ -15,7 +16,7 @@ public class SMPonderPlugin implements PonderPlugin {
     @SuppressWarnings("null")
     @Override
     public void registerScenes(PonderSceneRegistrationHelper<ResourceLocation> helper) {
-        SMDemos.register(helper);
+        SMPonders.registerScenes(helper);
     }
 
     @SuppressWarnings("null")

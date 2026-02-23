@@ -32,5 +32,6 @@ public class CreateSmitheryClient {
         CreateSmithery.LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
 
         PonderIndex.addPlugin(new SMPonderPlugin());
+
     }
 }

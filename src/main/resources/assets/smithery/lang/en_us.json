@@ -2,5 +2,7 @@
   "itemGroup.smithery": "Create: Smithery",
   "item.smithery.example_item": "Example Item",
   "smithery.ponder.beacon_demo.header": "Beacon Demo",
-  "smithery.ponder.beacon_demo.description": "A demonstration of how to build a beacon." 
+  "smithery.ponder.beacon_demo.description": "A demonstration of how to build a beacon.",
+  "block.smithery.industrial_furnace": "Industrial Furnace",
+  "smithery.ponder.industrial_furnace_demo.text_1": "Once built, right click the furnace to assemble."
 }

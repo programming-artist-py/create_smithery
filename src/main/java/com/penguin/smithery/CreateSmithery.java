@@ -1,19 +1,28 @@
 package com.penguin.smithery;
 
+import java.util.function.Supplier;
+
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 import com.penguin.smithery.item.example_item;
 import com.tterrag.registrate.Registrate;
+import com.penguin.smithery.block.industrialFurnace;
+import com.penguin.smithery.block.industrialFurnaceBlockEntity;
+import com.penguin.smithery.event.ModEvents;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
@@ -23,6 +32,7 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -31,6 +41,28 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 // The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(CreateSmithery.MODID)
 public class CreateSmithery {
+
+
+    public static final Block[][][] furnacePattern = new Block[][][] {
+        { // bottom
+            {Blocks.COBBLESTONE, Blocks.AIR, Blocks.COBBLESTONE},
+            {Blocks.AIR, Blocks.COBBLESTONE,   Blocks.AIR},
+            {Blocks.COBBLESTONE, Blocks.AIR, Blocks.COBBLESTONE}
+        },
+        { // middle
+            {Blocks.COBBLESTONE, Blocks.AIR,   Blocks.COBBLESTONE},
+            {Blocks.AIR,   Blocks.FURNACE, Blocks.AIR},
+            {Blocks.COBBLESTONE, Blocks.AIR,   Blocks.COBBLESTONE}
+        },
+        { // top
+            {Blocks.COBBLESTONE, Blocks.COBBLESTONE, Blocks.COBBLESTONE},
+            {Blocks.COBBLESTONE, Blocks.AIR,   Blocks.COBBLESTONE},
+            {Blocks.COBBLESTONE, Blocks.COBBLESTONE, Blocks.COBBLESTONE}
+        }
+    };
+
+
+
     // Define mod id in a common place for everything to reference
     public static final String MODID = "smithery";
     // Directly reference a slf4j logger
@@ -47,8 +79,30 @@ public class CreateSmithery {
     public static final Registrate REGISTRATE = Registrate.create(MODID);
 
 
+    public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, MODID);
+
     public static final DeferredItem<example_item> EXAMPLE_ITEM =
             ITEMS.register("example_item", props -> new example_item(new Item.Properties().stacksTo(64)));
+
+    public static final DeferredBlock<industrialFurnace> INDUSTRIAL_FURNACE =
+            BLOCKS.register("industrial_furnace", props -> new industrialFurnace(Block.Properties.of().strength(3.5f)));
+
+    public static final DeferredItem<BlockItem> INDUSTRIAL_FURNACE_ITEM =
+            ITEMS.register("industrial_furnace",
+                    () -> new BlockItem(INDUSTRIAL_FURNACE.get(),
+                            new Item.Properties()));
+
+    @SuppressWarnings("null")
+    public static final Supplier<BlockEntityType<industrialFurnaceBlockEntity>>
+            INDUSTRIAL_FURNACE_BLOCK_ENTITY =
+            BLOCK_ENTITY_TYPES.register(
+                    "industrial_furnace",
+                    () -> BlockEntityType.Builder
+                            .of(industrialFurnaceBlockEntity::new,
+                                    INDUSTRIAL_FURNACE.get())
+                            .build(null)
+            );
 
     // Creates a creative tab with the id "smithery:example_tab" for the example item, that is placed after the combat tab
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
@@ -58,6 +112,7 @@ public class CreateSmithery {
             .displayItems((parameters, output) -> {
                 output.accept(stack); // Add the example item to the tab. For your own tabs, this method is preferred over the event
                 output.accept(EXAMPLE_ITEM.get());
+                output.accept(INDUSTRIAL_FURNACE_ITEM.get());
             }).build());
 
     // The constructor for the mod class is the first code that is run when your mod is loaded.
@@ -74,10 +129,13 @@ public class CreateSmithery {
         // Register the Deferred Register to the mod event bus so tabs get registered
         CREATIVE_MODE_TABS.register(modEventBus);
 
+        BLOCK_ENTITY_TYPES.register(modEventBus);
+
         // Register ourselves for server and other game events we are interested in.
         // Note that this is necessary if and only if we want *this* class (CreateSmithery) to respond directly to events.
         // Do not add this line if there are no @SubscribeEvent-annotated functions in this class, like onServerStarting() below.
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(ModEvents.class);
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
